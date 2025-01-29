@@ -29,7 +29,7 @@ class TestTextNode(unittest.TestCase):
         node2 = TextNode("This is a test of not = text", TextType.NORMAL)
         self.assertNotEqual(node, node2)
 
-    
+ 
 
 
 

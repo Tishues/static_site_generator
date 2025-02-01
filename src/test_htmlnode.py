@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode
 
 
 # Unit tests
@@ -11,16 +11,51 @@ class TestHTMLNode(unittest.TestCase):
         # Test that the props_to_html method returns what we expect
         assert node.props_to_html() == ' href="https://boot.dev"'
 
-    def test_props_initialization(self):
-        node = HTMLNode(props=None)
-        node2 = HTMLNode(props={})
-            # Check if `props` is correctly initialized
-        self.assertEqual(node.props, {})  # `props=None` should be converted to {}
-        self.assertEqual(node2.props, {})  # Explicit `props={}` should remain as {}
+    def test_values(self):
+        node = HTMLNode(
+            "div",
+            "I wish I could read",
+        )
+        self.assertEqual(
+            node.tag,
+            "div",
+        )
+        self.assertEqual(
+            node.value,
+            "I wish I could read",
+        )
+        self.assertEqual(
+            node.children,
+            None,
+        )
+        self.assertEqual(
+            node.props,
+            None,
+        )
 
-        # Check if the two nodes are equal
-        self.assertEqual(node, node2)  # These nodes should be treated as equal
+    def test_repr(self):
+        node = HTMLNode(
+            "p",
+            "What a strange world",
+            None,
+            {"class": "primary"},
+        )
+        self.assertEqual(
+            node.__repr__(),
+            "HTMLNode(p, What a strange world, children: None, {'class': 'primary'})",
+        )
 
+    def test_to_html_no_children(self):
+        node = LeafNode("p", "Hello, world!")
+        self.assertEqual(node.to_html(), "<p>Hello, world!</p>")
+
+    def test_to_html_no_tag(self):
+        node = LeafNode(None, "Hello, world!")
+        self.assertEqual(node.to_html(), "Hello, world!")
+
+
+if __name__ == "__main__":
+    unittest.main()
 
 
     

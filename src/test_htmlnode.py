@@ -5,6 +5,8 @@ from htmlnode import HTMLNode, LeafNode, ParentNode
 # Unit tests
 
 class TestHTMLNode(unittest.TestCase):
+
+        #HTMLNode
     def test_props_to_html(self):
         # Create a node with some props
         node = HTMLNode(props={"href": "https://boot.dev"})
@@ -44,6 +46,8 @@ class TestHTMLNode(unittest.TestCase):
             node.__repr__(),
             "HTMLNode(p, What a strange world, children: None, {'class': 'primary'})",
         )
+
+            #LeafNode
 
     def test_to_html_no_children(self):
         node = LeafNode("p", "Hello, world!")

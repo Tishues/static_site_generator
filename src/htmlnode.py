@@ -33,3 +33,44 @@ class LeafNode(HTMLNode):
 
     def __repr__(self):
         return f"LeafNode({self.tag}, {self.value}, {self.props})"
+
+class ParentNode(HTMLNode):
+    def __init__(self, tag, children, props=None):
+        super().__init__(tag, None, children, props)
+        if any(child is self for child in children):
+            raise ValueError("ParentNode cannot be its own child!")
+        if len(children) != len({id(child) for child in children}):
+            raise ValueError("Duplicate child nodes detected in children.")
+
+    def to_html(self, visited=None):
+        if visited is None:
+            visited = set()
+        
+        if self.tag is None:
+            raise ValueError("No tag")
+        if self.children is None:
+            raise ValueError("No children")
+
+        # Prevent circular references
+        if id(self) in visited:
+            raise ValueError("Circular reference detected in ParentNode.")
+
+        visited.add(id(self))  # Mark this node as visited
+
+        # Start building the HTML string
+        html = f"<{self.tag}>"
+
+        # Handle each child node
+        for child in self.children:
+            if isinstance(child, ParentNode):  # Pass visited ONLY to ParentNode
+                html += child.to_html(visited=visited)
+            else:  # Assume it's a LeafNode
+                html += child.to_html()
+
+        # Close the tag
+        html += f"</{self.tag}>"
+
+        return html
+    
+    def __repr__(self):
+        return f"ParentNode({self.tag}, {self.children} {self.props})"

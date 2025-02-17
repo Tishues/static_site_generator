@@ -1,5 +1,8 @@
 import unittest
-from block_markdown import markdown_to_blocks
+from block_markdown import (
+    markdown_to_blocks, 
+    block_to_block_type,
+)
 
 
 class TestBlockMarkdown(unittest.TestCase):
@@ -51,6 +54,39 @@ This is the same paragraph on a new line
                 "* This is a list\n* with items",
             ],
         )
+
+
+    def test_paragraph(self):
+        assert block_to_block_type("just some normal text") == "paragraph"
+
+
+    def test_code(self):
+        assert block_to_block_type("```some text that is code````") == "code"
+
+
+    def test_heading(self):
+        assert block_to_block_type("#### this is a heading") == "heading"
+
+    
+    def test_ordered_list(self):
+        md =  """1. This
+2. Is
+3. An
+4. Ordered
+5. List"""
+        assert block_to_block_type(md) == "ordered list"
+
+
+    def test_unordered_list(self):
+        md = """* This
+* is
+* an unordered list"""
+        assert block_to_block_type(md) == "unordered list"
+
+    def test_quote(self):
+        assert block_to_block_type("> this is a quote\n> so is this") == "quote"
+
+
 
 
 if __name__ == "__main__":

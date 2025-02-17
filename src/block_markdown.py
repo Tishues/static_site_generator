@@ -1,3 +1,11 @@
+paragraph = "paragraph"
+heading = "heading"
+code = "code"
+quote = "quote"
+unordered_list = "unordered list"
+ordered_list = "ordered list"
+
+
 def markdown_to_blocks(markdown):  
     blocks = markdown.split("\n\n")
     result = []
@@ -11,24 +19,9 @@ def markdown_to_blocks(markdown):
 
 
 def block_to_block_type(markdown):
-    paragraph = "paragraph"
-    heading = "heading"
-    code = "code"
-    quote = "quote"
-    unordered_list = "unordered list"
-    ordered_list = "ordered list"
     lines = markdown.split('\n')
-    if markdown.startswith("# "):
-        return heading
-    if markdown.startswith("## "):
-        return heading
-    if markdown.startswith("### "):
-        return heading
-    if markdown.startswith("#### "):
-        return heading
-    if markdown.startswith("##### "):
-        return heading
-    if markdown.startswith("###### "):
+    
+    if markdown.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
         return heading
     if markdown.startswith("```") and markdown.endswith("```"):
         return code

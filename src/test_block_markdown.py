@@ -2,6 +2,12 @@ import unittest
 from block_markdown import (
     markdown_to_blocks, 
     block_to_block_type,
+    block_type_paragraph,
+    block_type_heading,
+    block_type_code,
+    block_type_quote,
+    block_type_unordered_list,
+    block_type_ordered_list,
 )
 
 
@@ -56,35 +62,21 @@ This is the same paragraph on a new line
         )
 
 
-    def test_paragraph(self):
-        assert block_to_block_type("just some normal text") == "paragraph"
-
-
-    def test_code(self):
-        assert block_to_block_type("```some text that is code````") == "code"
-
-
-    def test_heading(self):
-        assert block_to_block_type("#### this is a heading") == "heading"
-
-    
-    def test_ordered_list(self):
+    def test_block_to_block_type(self):
+        assert block_to_block_type("just some normal text") == block_type_paragraph
+        assert block_to_block_type("```some text that is code````") == block_type_code
+        assert block_to_block_type("#### this is a heading") == block_type_heading
         md =  """1. This
 2. Is
 3. An
 4. Ordered
 5. List"""
-        assert block_to_block_type(md) == "ordered list"
-
-
-    def test_unordered_list(self):
-        md = """* This
+        assert block_to_block_type(md) == block_type_ordered_list
+        md2 = """* This
 * is
 * an unordered list"""
-        assert block_to_block_type(md) == "unordered list"
-
-    def test_quote(self):
-        assert block_to_block_type("> this is a quote\n> so is this") == "quote"
+        assert block_to_block_type(md2) == block_type_unordered_list
+        assert block_to_block_type("> this is a quote\n> so is this") == block_type_quote
 
 
 

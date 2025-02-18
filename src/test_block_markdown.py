@@ -84,6 +84,17 @@ This is the same paragraph on a new line
         assert block_to_block_type("> this is a quote\n> so is this") == block_type_quote
 
 
+    def test_paragraphs(self):
+        md = """
+This is a **bolded** paragraph
+text inside of a p
+tag"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(html,
+                        "<div><p>This is a <strong>bolded</strong> paragraph text inside of a p tag</p></div>")
+
+
 
 
 if __name__ == "__main__":

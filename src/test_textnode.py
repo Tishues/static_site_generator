@@ -40,13 +40,13 @@ class TestTextNode(unittest.TestCase):
             #Test bold text
         text_node = TextNode("Hello, world!", TextType.BOLD)
         html_node = text_node_to_html_node(text_node)
-        assert html_node.tag == "b"
+        assert html_node.tag == "strong"
         assert html_node.value == "Hello, world!"
         assert html_node.props == {}
             #Test italic text
         text_node = TextNode("Hello, world!", TextType.ITALIC)
         html_node = text_node_to_html_node(text_node)
-        assert html_node.tag == "i"
+        assert html_node.tag == "em"
         assert html_node.value == "Hello, world!"
         assert html_node.props == {}
             #Test code text

@@ -1,5 +1,5 @@
-from htmlnode import HTMLNode
-from textnode import text_node_to_html_node
+from htmlnode import HTMLNode, ParentNode
+from textnode import text_node_to_html_node, TextType, TextNode
 from inline_markdown import split_nodes_delimiter
 
 
@@ -48,53 +48,72 @@ def markdown_to_html_node(markdown):
     all_blocks = []
     for block in blocks:
         block_type = block_to_block_type(block)
-        
+
         if block_type == block_type_paragraph:
-            node = HTMLNode("p", None, text_to_children(block))
+            cleaned_text = " ".join(block.split())
+            node = ParentNode("p", text_to_children(cleaned_text))
             all_blocks.append(node)
 
-        if block_type == block_type_heading:
+        elif block_type == block_type_heading:
             level = block.count('#')
             text = block.lstrip('#').strip()
-            node = HTMLNode(f"h{level}", None, text_to_children(text))
+            node = ParentNode(f"h{level}", text_to_children(text))
             all_blocks.append(node)
 
-        if block_type == block_type_quote:
-            node = HTMLNode("blockquote", None, text_to_children(block))
+        elif block_type == block_type_quote:
+            text = "\n".join(line.lstrip('>').strip() for line in block.split('\n'))
+            node = ParentNode("blockquote", text_to_children(text))
             all_blocks.append(node)
 
-        if block_type == block_type_code:
-            code_node = HTMLNode("code", None, text_to_children(block))
-            pre_node = HTMLNode("pre", None, [code_node])
+        elif block_type == block_type_code:
+            text = block.strip('`').strip()
+            if '\n' in text:
+                text = text.split('\n', 1)[1]
+            code_node = ParentNode("code", text_to_children(text))
+            pre_node = ParentNode("pre", [code_node])
             all_blocks.append(pre_node)
 
-        if block_type == block_type_unordered_list:
+        elif block_type == block_type_unordered_list:
             items = block.split('\n')
             list_nodes = []
             for item in items:
-                item_text = item.lstip('- ').lstrip('* ').lstrip('+ ').strip()
-                list_node = HTMLNode("li", None, text_to_children(item_text))
+                item_text = ""
+                for i, char in enumerate(item):
+                    if char not in ['*', '-', '+', ' ']:
+                        item_text = item[i:].strip()
+                        break
+                if not item_text:
+                    item_text = item.strip("*-+ ")
+                list_node = ParentNode("li", text_to_children(item_text))
                 list_nodes.append(list_node)
-            unlist_node = HTMLNode("ul", None, list_nodes)
+            unlist_node = ParentNode("ul", list_nodes)
             all_blocks.append(unlist_node)
 
         elif block_type == block_type_ordered_list:
-            items = block.spit('\n')
+            items = block.split('\n')
             list_nodes = []
             for item in items:
-                item_text = item.split('. ', 1)[1].strip()
-                list_node = HTMLNode("li", None, text_to_children(item_text))
+                try:
+                    item_text = item.split('. ', 1)[1].strip()
+                except IndexError:
+                    item_text = ''.join(c for c in item if not c.isdigit()).strip('. ')
+                list_node = ParentNode("li", text_to_children(item_text))
                 list_nodes.append(list_node)
-            ordlist_node = HTMLNode("ol", None, list_nodes)
+            ordlist_node = ParentNode("ol", list_nodes)
             all_blocks.append(ordlist_node)
 
-    return HTMLNode("div", None, all_blocks)
+    return ParentNode("div", all_blocks)
             
 
 def text_to_children(text):
-    text_nodes = split_nodes_delimiter(text) #Gives a list of TextNodes
+    nodes = [TextNode(text, TextType.TEXT)]
+    nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD) #Gives a list of TextNodes
+    nodes = split_nodes_delimiter(nodes, "__", TextType.BOLD)
+    nodes = split_nodes_delimiter(nodes, "*", TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
     html_nodes = [] #Creates an empty list to store HTMLNodes
-    for text_node in text_nodes: #Iterate though text_nodes
-        html_node = text_node_to_html_node(text_node) #Convert each Textnode to HTMLNode
+    for node in nodes: #Iterate though text_nodes
+        html_node = text_node_to_html_node(node) #Convert each Textnode to HTMLNode
         html_nodes.append(html_node) #Add the new HTMLNode to our list
     return html_nodes

@@ -1,6 +1,7 @@
 import unittest
 from block_markdown import (
     markdown_to_blocks, 
+    markdown_to_html_node,
     block_to_block_type,
     block_type_paragraph,
     block_type_heading,
@@ -12,7 +13,7 @@ from block_markdown import (
 
 
 class TestBlockMarkdown(unittest.TestCase):
-    def my_test_markdown_to_blocks(self):
+    def test_my_markdown_to_blocks(self):
         text = "# This is a heading\n\nThis is a paragraph of text. It has some **bold** and *italic* words inside of it.\n\n* This is the first list item in a list block\n* This is a list item\n* This is another list item"
         test = markdown_to_blocks(text)
         self.assertListEqual(["# This is a heading", "This is a paragraph of text. It has some **bold** and *italic* words inside of it.", "* This is the first list item in a list block\n* This is a list item\n* This is another list item"], test)
@@ -73,8 +74,12 @@ This is the same paragraph on a new line
 5. List"""
         assert block_to_block_type(md) == block_type_ordered_list
         md2 = """* This
-* is
-* an unordered list"""
+* is an
+* unordered list"""
+        assert block_to_block_type(md) == block_type_ordered_list
+        md2 = """- This
+- is another
+- unordered list"""
         assert block_to_block_type(md2) == block_type_unordered_list
         assert block_to_block_type("> this is a quote\n> so is this") == block_type_quote
 

@@ -185,7 +185,22 @@ class TestInLineMarkdown(unittest.TestCase):
                             TextNode("link", TextType.LINK, "https://boot.dev"),], nodes)
 
 
+    def test_link_extraction(self):
+        text = "Read my [first post here](/majesty)"
+        links = extract_markdown_links(text)
+        #print(f"Links found: {links}")
+        assert len(links) == 1
+        assert links[0] == ("first post here", "/majesty")
 
+    def test_split_nodes_link(self):
+        node = TextNode("Read my [first post here](/majesty) now!", TextType.TEXT)
+        nodes = split_nodes_link([node])
+        assert len(nodes) == 3
+        assert nodes[0].text == "Read my "
+        assert nodes[1].text == "first post here"
+        assert nodes[1].text_type == TextType.LINK
+        assert nodes[1].url == "/majesty"
+        assert nodes[2].text == " now!"
 
 if __name__ == "__main__":
     unittest.main()

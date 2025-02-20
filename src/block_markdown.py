@@ -1,6 +1,8 @@
 from htmlnode import ParentNode
+import re
+import os
 from textnode import text_node_to_html_node, TextType, TextNode
-from inline_markdown import split_nodes_delimiter
+from inline_markdown import split_nodes_delimiter, split_nodes_link
 
 
 block_type_paragraph = "paragraph"
@@ -16,6 +18,9 @@ def markdown_to_blocks(markdown):
     result = []
     for block in blocks:
         if block != "":
+            # Debug: print blocks that contain ```
+            if "```" in block:
+                print("Found code block:", repr(block))
             text = block.strip()
             result.append(text)
         else:
@@ -66,9 +71,7 @@ def markdown_to_html_node(markdown):
             all_blocks.append(node)
 
         elif block_type == block_type_code:
-            text = block.strip('`').strip()
-            if '\n' in text:
-                text = text.split('\n', 1)[1]
+            text = block.strip().strip('`').strip()
             code_node = ParentNode("code", text_to_children(text))
             pre_node = ParentNode("pre", [code_node])
             all_blocks.append(pre_node)
@@ -107,6 +110,7 @@ def markdown_to_html_node(markdown):
 
 def text_to_children(text):
     nodes = [TextNode(text, TextType.TEXT)]  #Gives a list of TextNodes
+    nodes = split_nodes_link(nodes)
     nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
     nodes = split_nodes_delimiter(nodes, "__", TextType.BOLD)
     nodes = split_nodes_delimiter(nodes, "*", TextType.ITALIC)
@@ -117,3 +121,28 @@ def text_to_children(text):
         html_node = text_node_to_html_node(node) #Convert each Textnode to HTMLNode
         html_nodes.append(html_node) #Add the new HTMLNode to our list
     return html_nodes
+
+
+def extract_title(markdown):  
+    h1_match = re.search(r"#\s+(.+)", markdown)
+    if h1_match:
+        return h1_match.group(1).strip()
+    else:
+        raise Exception("no header found")
+    
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    with open(from_path) as file:
+        read_from_path = file.read()
+    with open(template_path) as file:
+        read_from_template = file.read()
+    node = markdown_to_html_node(read_from_path)
+    html = node.to_html()
+    page_title = extract_title(read_from_path)
+    read_from_template = read_from_template.replace("{{ Title }}", page_title)
+    read_from_template = read_from_template.replace("{{ Content }}", html)
+    directory = os.path.dirname(dest_path)
+    os.makedirs(directory, exist_ok=True)
+    with open(dest_path, 'w') as file:
+        file.write(read_from_template)

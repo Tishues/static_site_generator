@@ -1,8 +1,10 @@
 import unittest
+from textnode import TextNode, TextType
 from block_markdown import (
     markdown_to_blocks, 
     markdown_to_html_node,
     block_to_block_type,
+    extract_title,
     block_type_paragraph,
     block_type_heading,
     block_type_code,
@@ -92,7 +94,7 @@ tag"""
         node = markdown_to_html_node(md)
         html = node.to_html()
         self.assertEqual(html,
-                        "<div><p>This is a <strong>bolded</strong> paragraph text inside of a p tag</p></div>")
+                        "<div><p>This is a <b>bolded</b> paragraph text inside of a p tag</p></div>")
         
 
     def test_paragraphs(self):
@@ -108,7 +110,7 @@ This is a second paragraph with some `code` and *italic*
         node = markdown_to_html_node(md)
         html = node.to_html()
         self.assertEqual(html,
-                        "<div><p>This is a <strong>bolded</strong> paragraph text inside of a p tag</p><p>This is a second paragraph with some <code>code</code> and <em>italic</em></p></div>")
+                        "<div><p>This is a <b>bolded</b> paragraph text inside of a p tag</p><p>This is a second paragraph with some <code>code</code> and <i>italic</i></p></div>")
         
 
     def test_lists(self):
@@ -128,7 +130,7 @@ This is a second paragraph with some `code` and *italic*
         node = markdown_to_html_node(md)
         html = node.to_html()
         self.assertEqual(html,
-                        "<div><ul><li>This is a list</li><li>with items</li><li>and <em>more</em> items</li></ul><ol><li>this is an <strong>ordered</strong> list</li><li>with items</li><li>and more <code>items</code></li></ol><ul><li>This is a second unordered list</li><li>with two items</li></ul></div>")
+                        "<div><ul><li>This is a list</li><li>with items</li><li>and <i>more</i> items</li></ul><ol><li>this is an <b>ordered</b> list</li><li>with items</li><li>and more <code>items</code></li></ol><ul><li>This is a second unordered list</li><li>with two items</li></ul></div>")
         
 
     def test_headings(self):
@@ -159,6 +161,35 @@ this is paragraph text
         html = node.to_html()
         self.assertEqual(html,
                          "<div><blockquote>This is a blockquote block</blockquote><p>this is paragraph text</p></div>")
+        
+
+    def test_extract_title(self):
+        md = """
+# This is a header to be extracted
+
+this is some paragraph text
+"""
+        node = extract_title(md)
+        self.assertEqual(node,
+                         "This is a header to be extracted")
+        
+
+    def test_extract_no_title(self):
+        md = """
+This is a header without a leading # to be extracted
+
+this is some paragraph text
+"""
+        node = extract_title(md)
+        self.assertRaises(Exception)
+
+
+    def test_markdown_to_html_with_link(self):
+        markdown_text = "Read my [first post here](/majesty) now!"
+        html_node = markdown_to_html_node(markdown_text)
+        html = html_node.to_html()
+        #print("Generated HTML:", html)  # Add this line
+        assert '<a href="/majesty">first post here</a>' in html
 
 
 

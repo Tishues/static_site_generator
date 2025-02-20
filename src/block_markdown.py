@@ -14,7 +14,7 @@ block_type_ordered_list = "ordered list"
 
 
 def markdown_to_blocks(markdown):  
-    blocks = markdown.split("\n\n")
+    blocks = markdown.split("\n")
     result = []
     for block in blocks:
         if block != "":
@@ -146,3 +146,78 @@ def generate_page(from_path, template_path, dest_path):
     os.makedirs(directory, exist_ok=True)
     with open(dest_path, 'w') as file:
         file.write(read_from_template)
+
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    print(f"\nProcessing directory: {dir_path_content}")
+    # Process all entries in the current directory
+    for item in os.listdir(dir_path_content):
+        source_path = os.path.join(dir_path_content, item)
+        print(f"Looking at: {source_path}")
+        
+        if os.path.isfile(source_path) and item.endswith('.md'):
+            # Create matching directory in public
+            print(f"Found MD file: {source_path}")
+            print(f"Will create HTML in: {dest_dir_path}")
+            os.makedirs(dest_dir_path, exist_ok=True)
+            
+            # Generate the HTML file
+            dest_file = os.path.join(dest_dir_path, 'index.html')
+            print(f"Generating: {dest_file}")
+            generate_page(source_path, template_path, dest_file)
+        
+        elif os.path.isdir(source_path):
+            # Process subdirectory
+            sub_dest_dir = os.path.join(dest_dir_path, item)
+            print(f"Found directory, recursing into: {source_path}")
+            print(f"Will create files in: {sub_dest_dir}")
+            generate_pages_recursive(source_path, template_path, sub_dest_dir)
+#def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+ #   print(f"Processing directory: {dir_path_content}")  # Debug print
+  #  items = os.listdir(dir_path_content)
+   # for item in items:
+    #    content_full_path = os.path.join(dir_path_content, item)
+     #   print(f"Looking at: {content_full_path}")  # Debug print
+      #  
+       # if os.path.isfile(content_full_path) and item.endswith('.md'):
+            # Create equivalent directory structure in destination
+        #    relative_path = os.path.relpath(os.path.dirname(content_full_path), dir_path_content)
+         #   dest_dir = os.path.join(dest_dir_path, relative_path)
+          #  os.makedirs(dest_dir, exist_ok=True)
+            
+            # This is where we change the destination path logic
+           # if item == "index.md":
+#                dest_full_path = os.path.join(dest_dir_path, os.path.dirname(relative_path), 'index.html')
+ #           else:
+  #              dest_full_path = os.path.join(dest_dir, item.replace('.md', '.html'))   
+            # Generate the HTML file
+            #dest_full_path = os.path.join(dest_dir, 'index.html')
+   #         print(f"Generating: {dest_full_path}")  # Debug print
+    #        generate_page(content_full_path, template_path, dest_full_path)
+        
+     #   elif os.path.isdir(content_full_path):
+      #      new_dest_path = os.path.join(dest_dir_path, item)
+       #     os.makedirs(new_dest_path, exist_ok=True)
+        #    generate_pages_recursive(content_full_path, template_path, new_dest_path)
+
+#def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+ #   items = os.listdir(dir_path_content)
+  #  for item in items:
+   #     content_full_path = os.path.join(dir_path_content, item)
+    #    if os.path.isfile(content_full_path) and item.endswith('.md'):
+     #       # Keep the name 'index.html' if the source is 'index.md'
+      #      if item == 'index.md':
+       #         html_name = 'index.html'
+        #    else:
+         #       html_name = item.replace('.md', '.html')
+          #  dest_full_path = os.path.join(dest_dir_path, html_name)
+           # generate_page(content_full_path, template_path, dest_full_path)
+#        elif os.path.isdir(content_full_path):
+ #           if item != "__pycache__":  # ignore Python cache directories
+  #              new_dest_path = os.path.join(dest_dir_path, item)
+   #             os.makedirs(new_dest_path, exist_ok=True)
+    #            generate_pages_recursive(content_full_path, template_path, new_dest_path)
+
+#os.listdir() - to see what's inside a directory
+#os.path.join() - to create proper file paths
+#os.path.isfile() - to check if something is a file (vs a directory)

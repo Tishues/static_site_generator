@@ -182,7 +182,7 @@ class TestInLineMarkdown(unittest.TestCase):
                             TextNode(" and an ", TextType.TEXT),
                             TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
                             TextNode(" and a ", TextType.TEXT),
-                            TextNode("link", TextType.LINK, "https://boot.dev"),], nodes)
+                            TextNode("link", TextType.LINK, "https://boot.dev")], nodes)
 
 
     def test_link_extraction(self):

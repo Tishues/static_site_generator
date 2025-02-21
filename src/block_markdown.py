@@ -51,23 +51,23 @@ def markdown_to_html_node(markdown):
     all_blocks = []
     for block in blocks:
         block_type = block_to_block_type(block)
-
+        # Paragraphs
         if block_type == block_type_paragraph:
             cleaned_text = " ".join(block.split())
             node = ParentNode("p", text_to_children(cleaned_text))
             all_blocks.append(node)
-
+        # Headings
         elif block_type == block_type_heading:
             level = block.count('#')
             text = block.lstrip('#').strip()
             node = ParentNode(f"h{level}", text_to_children(text))
             all_blocks.append(node)
-
+        # Quotes
         elif block_type == block_type_quote:
             text = " ".join(line.lstrip('>').strip() for line in block.split('\n'))
             node = ParentNode("blockquote", text_to_children(text))
             all_blocks.append(node)
-
+        # Code
         elif block_type == block_type_code:
             # Remove the backticks but keep the rest of the formatting by splitting at lines
             lines = block.split('\n')
@@ -76,7 +76,7 @@ def markdown_to_html_node(markdown):
             code_node = LeafNode("code", code_content) 
             pre_node = ParentNode("pre", [code_node])
             all_blocks.append(pre_node)
-
+        # Unordered lists
         elif block_type == block_type_unordered_list:
             items = block.split('\n')
             list_nodes = []
@@ -91,7 +91,7 @@ def markdown_to_html_node(markdown):
                 list_nodes.append(list_node)
             unlist_node = ParentNode("ul", list_nodes)
             all_blocks.append(unlist_node)
-
+        # Ordered lists
         elif block_type == block_type_ordered_list:
             items = [item.strip() for item in block.split('\n') if item.strip()]
             list_nodes = []
@@ -124,7 +124,6 @@ def text_to_children(text):
             temp_nodes = split_nodes_delimiter(temp_nodes, "*", TextType.ITALIC)
             temp_nodes = split_nodes_delimiter(temp_nodes, "`", TextType.CODE)
             processed_nodes.extend(temp_nodes)
-    
     html_nodes = []
     for node in processed_nodes:
         if isinstance(node, LeafNode):
@@ -162,7 +161,6 @@ def generate_page(from_path, template_path, dest_path):
 def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
     # Get list of everything in the content directory
     entries = os.listdir(dir_path_content)
-    
     for entry in entries:
         # Create full paths
         content_path = os.path.join(dir_path_content, entry)
@@ -175,12 +173,10 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
                 # Handle other .md files
                 base_name = os.path.splitext(entry)[0]
                 html_path = os.path.join(dest_dir_path, base_name, 'index.html')
-            
             # Make sure the destination directory exists
             os.makedirs(os.path.dirname(html_path), exist_ok=True)
             # Generate the page
             generate_page(content_path, template_path, html_path)
-            
         elif os.path.isdir(content_path):
             # It's a directory, recurse into it
             new_dest = os.path.join(dest_dir_path, entry)

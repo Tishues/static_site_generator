@@ -188,7 +188,6 @@ this is some paragraph text
         markdown_text = "Read my [first post here](/majesty) now!"
         html_node = markdown_to_html_node(markdown_text)
         html = html_node.to_html()
-        #print("Generated HTML:", html)  # Add this line
         assert '<a href="/majesty">first post here</a>' in html
 
 

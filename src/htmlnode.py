@@ -55,28 +55,22 @@ class ParentNode(HTMLNode):
     def to_html(self, visited=None):
         if visited is None:
             visited = set()
-        
         if self.tag is None:
             raise ValueError("No tag")
         if self.children is None:
             raise ValueError("No children")
-
         # Prevent circular references
         if id(self) in visited:
             raise ValueError("Circular reference detected in ParentNode.")
-
         visited.add(id(self))  # Mark this node as visited
-
         # Start building the HTML string
         html = f"<{self.tag}>"
-
         # Handle each child node
         for child in self.children:
             if isinstance(child, ParentNode):  # Pass visited ONLY to ParentNode
                 html += child.to_html(visited=visited)
             else:  # Assume it's a LeafNode
                 html += child.to_html()
-
         # Close the tag
         html += f"</{self.tag}>"
 

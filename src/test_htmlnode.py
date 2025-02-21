@@ -3,9 +3,7 @@ from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 # Unit tests
-
 class TestHTMLNode(unittest.TestCase):
-
         #HTMLNode
     def test_props_to_html(self):
         # Create a node with some props
@@ -47,8 +45,8 @@ class TestHTMLNode(unittest.TestCase):
             "HTMLNode(p, What a strange world, children: None, {'class': 'primary'})",
         )
 
-            #LeafNode
 
+        #LeafNode
     def test_to_html_no_children(self):
         node = LeafNode("p", "Hello, world!")
         self.assertEqual(node.to_html(), "<p>Hello, world!</p>")
@@ -57,8 +55,8 @@ class TestHTMLNode(unittest.TestCase):
         node = LeafNode(None, "Hello, world!")
         self.assertEqual(node.to_html(), "Hello, world!")
 
-        #ParentNode
 
+        #ParentNode
     def test_empty_children(self):
         empty_parent = ParentNode("p", [])
         self.assertEqual(empty_parent.to_html(), "<p></p>")

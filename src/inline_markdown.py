@@ -1,4 +1,5 @@
 from textnode import TextNode, TextType
+from htmlnode import LeafNode
 import re
 
 
@@ -53,50 +54,65 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
 
 def split_nodes_image(old_nodes):
-    new_nodes = [] #creating an empty list
-    for old_node in old_nodes: #iterating through old_nodes
-        if old_node.text_type != TextType.TEXT: #checks to see if the node is plain text, if it isn't it's an image or a link
-            new_nodes.append(old_node) #add any image/link to the result unchanged
-            continue #skips the rest of the loop if plain text is not detected
-        original_text = old_node.text #get the text content from the node
-        images = extract_markdown_images(original_text) #gets a list of tuples from each image in the text(alt text, url)
-        if len(images) == 0: #checks for alt_text and url
-            new_nodes.append(old_node) #if none found return result unchanged
+    new_nodes = []
+    for old_node in old_nodes:
+        if old_node.text_type != TextType.TEXT:
+            new_nodes.append(old_node)
             continue
-        for image in images: #loop through the images in the text one at a time
-            sections = original_text.split(f"![{image[0]}]({image[1]})", 1) #splitting the text from before and after the alt_text and url into sections
-            if len(sections) != 2: #check to see there is 
+        
+        original_text = old_node.text
+        images = extract_markdown_images(original_text)
+        
+        if len(images) == 0:
+            new_nodes.append(old_node)
+            continue
+            
+        for image in images:
+            alt_text, url = image  # unpack the tuple
+            sections = original_text.split(f"![{alt_text}]({url})", 1)
+            
+            if len(sections) != 2:
                 raise ValueError("invalid markdown, image section not closed")
-            if sections[0] != "": #check to see if the section is emtpy
-                new_nodes.append(TextNode(sections[0], TextType.TEXT)) #if section is not emtpy, append it to the node
-            new_nodes.append(TextNode(image[0], TextType.IMAGE, image[1],)) #creates the node that represents the final image from the text
-            original_text = sections[1] #takes the section after the current image in the loop and make it the new text to process
-        if original_text != "": #checks to see if there's more text to process
-            new_nodes.append(TextNode(original_text, TextType.TEXT)) #use the saved section of text for the new loop
+                
+            if sections[0]:  # text before image
+                new_nodes.append(TextNode(sections[0], TextType.TEXT))
+                
+            # Create LeafNode for image instead of TextNode
+            img_node = LeafNode("img", "", {"src": url, "alt": alt_text})
+            new_nodes.append(img_node)
+            
+            original_text = sections[1]
+            
+        if original_text:
+            new_nodes.append(TextNode(original_text, TextType.TEXT))
+            
     return new_nodes
 
 
 def split_nodes_link(old_nodes):
-    new_nodes = [] #creating an empty list
-    for old_node in old_nodes: #iterating through old_nodes
-        if old_node.text_type != TextType.TEXT: #checks to see if the node is plain text, if it isn't it's an image or a link
-            new_nodes.append(old_node) #add any image/link to the result unchanged
-            continue #skips the rest of the loop if no plain text is detected
-        original_text = old_node.text #get the text content from the node
-        links = extract_markdown_links(original_text) #gets a list of tuples from each link in the text(text, url)
-        if len(links) == 0: #checks for text and url
-            new_nodes.append(old_node) #if none found return result unchanged
+    new_nodes = []
+    for old_node in old_nodes:
+        if isinstance(old_node, LeafNode):  # Handle LeafNodes
+            new_nodes.append(old_node)
             continue
-        for link in links: #loop through the links in the text one at a time
-            sections = original_text.split(f"[{link[0]}]({link[1]})", 1) #splitting the text from before and after the text and url into sections
-            if len(sections) != 2: #check to see there is 
+        if old_node.text_type != TextType.TEXT:
+            new_nodes.append(old_node)
+            continue
+        original_text = old_node.text
+        links = extract_markdown_links(original_text)
+        if len(links) == 0:
+            new_nodes.append(old_node)
+            continue
+        for link in links:
+            sections = original_text.split(f"[{link[0]}]({link[1]})", 1)
+            if len(sections) != 2:
                 raise ValueError("invalid markdown, link section not closed")
-            if sections[0] != "": #check to see if the section is emtpy
-                new_nodes.append(TextNode(sections[0], TextType.TEXT)) #if section is not emtpy, append it to the node
-            new_nodes.append(TextNode(link[0], TextType.LINK, link[1],)) #creates the node that represents the final link from the text
-            original_text = sections[1] #takes the section after the current image in the loop and make it the new text to process
-        if original_text != "": #checks to see if there's more text to process
-            new_nodes.append(TextNode(original_text, TextType.TEXT)) #use the saved section of text for the new loop
+            if sections[0] != "":
+                new_nodes.append(TextNode(sections[0], TextType.TEXT))
+            new_nodes.append(TextNode(link[0], TextType.LINK, link[1]))
+            original_text = sections[1]
+        if original_text != "":
+            new_nodes.append(TextNode(original_text, TextType.TEXT))
     return new_nodes
 
 

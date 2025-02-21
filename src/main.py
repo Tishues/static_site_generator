@@ -21,7 +21,6 @@ def main():
 
     generate_pages_recursive(from_path, template_path, dest_path)
 
-
     
 
 main()
